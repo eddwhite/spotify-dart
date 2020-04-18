@@ -28,14 +28,48 @@ class Playlists extends EndpointPaging {
         (json) => Track.fromJson(json['track']));
   }
 
+  Future<Playlist> get(String playlistId) async {
+    return Playlist.fromJson(
+        jsonDecode(await _api._get('v1/playlists/$playlistId'))
+    );
+  }
+
+  Future<List<Image>> getCoverImage(String playlistId) async {
+    return (jsonDecode(await _api._get('v1/playlists/$playlistId/images')) as List)
+      ?.map((e) => e == null ? null : Image.fromJson(e))
+      ?.toList();
+  }
+
   /// [userId] - the Spotify user ID
   ///
   /// [playlistName] - the name of the new playlist
-  Future<Playlist> createPlaylist(String userId, String playlistName) async {
+  Future<Playlist> createPlaylist(String userId, String playlistName, 
+    {bool public, bool collaborative, String description}) async 
+  {
     final url = 'v1/users/$userId/playlists';
+    final data = <String, dynamic>{'name': playlistName};
+
+    if (description != null) data['description'] = description;
+    if (public != null) data['public'] = public;
+    if (collaborative != null) data['collaborative'] = collaborative;
+
     final playlistJson =
-        await _api._post(url, jsonEncode({'name': playlistName}));
+        await _api._post(url, jsonEncode(data));
     return await Playlist.fromJson(jsonDecode(playlistJson));
+  }
+
+  Future<void> editPlaylist(String playlistId, 
+    {String name, bool public, bool collaborative, String description}) async 
+  {
+    final url = 'v1/playlists/$playlistId';
+    final data = <String, dynamic>{};
+
+    if (name != null) data['name'] = name;
+    if (public != null) data['public'] = public;
+    if (collaborative != null) data['collaborative'] = collaborative;
+    if (description != null) data['description'] = description;
+
+    await _api._put(url, jsonEncode(data));
   }
 
   /// [trackUri] - the Spotify track uri (i.e spotify:track:4iV5W9uYEdYUVa79Axb7Rh)
@@ -48,6 +82,16 @@ class Playlists extends EndpointPaging {
         jsonEncode({
           'uris': [trackUri]
         }));
+  }
+
+  Future<Null> addTracks(List<String> trackUris, String playlistId, {int position}) async {
+    assert(trackUris.length <= 100);
+    final url = 'v1/playlists/$playlistId/tracks';
+    final data = <String, dynamic>{'uris': trackUris};
+
+    if (position != null) data['position'] = position;
+
+    await _api._post(url, jsonEncode(data));
   }
 
   Future<Null> removeTrack(String trackUri, String playlistId,

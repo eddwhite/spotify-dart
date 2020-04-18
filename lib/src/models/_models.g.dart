@@ -212,10 +212,9 @@ Playlist _$PlaylistFromJson(Map<String, dynamic> json) {
         : User.fromJson(json['owner'] as Map<String, dynamic>)
     ..public = json['public'] as bool
     ..snapshotId = json['snapshot_id'] as String
-    ..tracks = (json['tracks'] as List)
-        ?.map(
-            (e) => e == null ? null : Track.fromJson(e as Map<String, dynamic>))
-        ?.toList()
+    ..tracks = json['tracks'] == null
+        ? null
+        : Paging.fromJson(json['tracks'] as Map<String, dynamic>)
     ..type = json['type'] as String
     ..uri = json['uri'] as String;
 }
