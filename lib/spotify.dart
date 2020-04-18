@@ -11,6 +11,7 @@ import 'dart:io' // Default
     if (dart.library.io) 'dart:io'
     if (dart.library.html) 'dart:html';
 
+import 'package:collection/collection.dart';
 import 'package:http/http.dart' as http;
 import 'package:oauth2/oauth2.dart' as oauth2;
 

@@ -108,6 +108,19 @@ class Playlists extends EndpointPaging {
     await _api._delete(url, body);
   }
 
+  Future<Null> removeTracks(List<String> trackUris, String playlistId, 
+    {List<List<int>> positions, String snapshotId}) async 
+  {
+    assert(trackUris.length <= 100);
+    final url = 'v1/playlists/$playlistId/tracks';
+    final data = <String, dynamic>{'tracks': trackUris.map((e) => {'uri': e}).toList()};
+
+    if (positions != null) IterableZip([data['tracks'] as List, positions]).map((e) => e[0]['positions'] = e[1]);
+    if (snapshotId != null) data['snapshot_id'] = snapshotId;
+
+    await _api._delete(url, jsonEncode(data));
+  }
+
   /// [country] - a country: an ISO 3166-1 alpha-2 country code. Provide this
   /// parameter to ensure that the category exists for a particular country.
   ///
